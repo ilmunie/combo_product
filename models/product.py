@@ -12,6 +12,9 @@ class ComboProduct(models.Model):
     _description = "Product packs"
 
     @api.onchange('product_id')
+    def product_id_name(self):
+        self.name = self.product_id.display_name
+    @api.onchange('product_id')
     def product_id_onchange(self):
         return {'domain': {'product_id': [('is_combo', '=', False)]}}
 
@@ -25,7 +28,10 @@ class ComboProduct(models.Model):
     def name_get(self):
         res = []
         for rec in self:
-            name = rec.product_id.display_name + ' (x' + str(rec.product_quantity) + ' ' + (rec.uom_id.short_name or rec.uom_id.name)+ ')'
+            if rec.name:
+                name = rec.name + ' (x' + str(rec.product_quantity) + ' ' + (rec.uom_id.short_name or rec.uom_id.name)+ ')'
+            else:
+                name = rec.product_id.display_name + ' (x' + str(rec.product_quantity) + ' ' + (rec.uom_id.short_name or rec.uom_id.name)+ ')'
             res.append((rec.id, name))
         return res
 
@@ -34,10 +40,11 @@ class ComboProductTemplate(models.Model):
 
     is_combo = fields.Boolean('Combo Product', default=False)
     combo_product_id = fields.One2many('product.combo', 'product_template_id', 'Combo Item')
+    combo_prefix = fields.Char(default="Combo")
 
-    @api.onchange('combo_product_id','combo_product_id.product_id', 'combo_product_id.product_id', 'combo_product_id.product_quantity','combo_product_id.uom_id')
+    @api.onchange('combo_product_id','combo_product_id.product_id', 'combo_product_id.product_id', 'combo_product_id.product_quantity','combo_product_id.uom_id', 'combo_prefix')
     def compute_combo_product_name(self):
         for record in self:
             if record.combo_product_id:
-                name = 'COMBO:' + ' + '.join(record.combo_product_id.mapped('display_name'))
+                name = record.combo_prefix + ": " + ' + '.join(record.combo_product_id.mapped('display_name'))
                 record.name = name
