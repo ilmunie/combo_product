@@ -41,10 +41,11 @@ class ComboProductTemplate(models.Model):
     is_combo = fields.Boolean('Combo Product', default=False)
     combo_product_id = fields.One2many('product.combo', 'product_template_id', 'Combo Item')
     combo_prefix = fields.Char(default="Combo")
+    no_update_name = fields.Boolean(string="No actualizar nombre")
 
     @api.onchange('combo_product_id','combo_product_id.product_id', 'combo_product_id.product_id', 'combo_product_id.product_quantity','combo_product_id.uom_id', 'combo_prefix')
     def compute_combo_product_name(self):
         for record in self:
-            if record.combo_product_id:
+            if record.combo_product_id and not record.no_update_name:
                 name = record.combo_prefix + ": " + ' + '.join(record.combo_product_id.mapped('display_name'))
                 record.name = name

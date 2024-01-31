@@ -35,9 +35,13 @@
             <xpath expr="//notebook/page[@name='sales']" position="after">
                 <page name="combo_product" string="Combo Items" attrs="{'invisible':[('is_combo','=',False)]}">
                     <group>
-                        <field name="combo_prefix"/>
+                        <group>
+                            <field name="combo_prefix"/>
+                        </group>
+                        <group>
+                            <field name="no_update_name"/>
+                        </group>
                     </group>
-
                     <field name="combo_product_id">
                         <tree editable="bottom">
                             <field name="product_id" options="{'no_create': True}" />
